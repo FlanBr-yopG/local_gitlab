@@ -14,6 +14,11 @@ main() {
     cat docker-compose.yml.bak | sed -e "s+/srv/docker/gitlab+$persistance_d+g" > docker-compose.yml
     rm docker-compose.yml.bak
   fi ;
+  if ! egrep 'USERMAP_UID' docker-compose.yml >/dev/null ; then
+    cat docker-compose.yml     | sed -E "s/^( *)environment: *\$/\\0\\n\\1- USERMAP_GID=$(id -g)/" > docker-compose.yml.bak
+    cat docker-compose.yml.bak | sed -E "s/^( *)environment: *\$/\\0\\n\\1- USERMAP_UID=$(id -u)/" > docker-compose.yml
+    rm docker-compose.yml.bak
+  fi ;
   docker-compose up
 }
 curl_wget() {
