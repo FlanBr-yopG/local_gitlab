@@ -1,6 +1,8 @@
 #!/bin/bash
 
 persistance_d_base='gitlab'
+# sameersbn_docker_gitlab=master
+sameersbn_docker_gitlab='10.2.4'
 
 main() {
   local persistance_d="$(cd ../../../; pwd)/$persistance_d_base"
@@ -8,7 +10,7 @@ main() {
   [[ -d "$persistance_d" ]] || mkdir -p "$persistance_d"
   chmod o+rwx "$persistance_d"
   egrep docker-compose .gitignore >/dev/null || echo 'docker-compose.yml' >> .gitignore
-  [[ -e docker-compose.yml ]] || curl_wget 'https://raw.githubusercontent.com/sameersbn/docker-gitlab/master/docker-compose.yml'
+  [[ -e docker-compose.yml ]] || curl_wget "https://raw.githubusercontent.com/sameersbn/docker-gitlab/$sameersbn_docker_gitlab/docker-compose.yml"
   if egrep '/srv/docker/gitlab' docker-compose.yml >/dev/null ; then
     cp docker-compose.yml docker-compose.yml.bak
     cat docker-compose.yml.bak | sed -e "s+/srv/docker/gitlab+$persistance_d+g" > docker-compose.yml
@@ -19,7 +21,11 @@ main() {
     cat docker-compose.yml.bak | sed -E "s/^( *)environment: *\$/\\0\\n\\1- USERMAP_UID=$(id -u)/" > docker-compose.yml
     rm docker-compose.yml.bak
   fi ;
-  docker-compose up
+  docker-compose up -d \
+  && sleep 5 \
+  && echo -e "\n\nNOTE: Tailing logs. Ctrl-C to stop.\n\n" \
+  && sleep 5 \
+  && docker-compose logs -f
 }
 curl_wget() {
   local u=$1
