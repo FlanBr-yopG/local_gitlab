@@ -8,7 +8,7 @@ main() {
   local persistance_d="$(cd ../../../; pwd)/$persistance_d_base"
   set -ex
   [[ -d "$persistance_d" ]] || mkdir -p "$persistance_d"
-  chmod o+rwx "$persistance_d"
+  # chmod o+rwx "$persistance_d"
   egrep docker-compose .gitignore >/dev/null || echo 'docker-compose.yml' >> .gitignore
   [[ -e docker-compose.yml ]] || curl_wget "https://raw.githubusercontent.com/sameersbn/docker-gitlab/$sameersbn_docker_gitlab/docker-compose.yml"
   if egrep '/srv/docker/gitlab' docker-compose.yml >/dev/null ; then
