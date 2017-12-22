@@ -7,6 +7,7 @@ sameersbn_docker_gitlab='10.2.4'
 main() {
   local persistance_d="$(cd ../../../; pwd)/$persistance_d_base"
   set -ex
+  local sed=$(sed --version 2>/dev/null | head -1 | egrep 'GNU sed' >/dev/null && echo sed || { gsed --version 1>&2 || brew install gnu-sed 1>&2 ; echo gsed ; } )
   [[ -d "$persistance_d" ]] || mkdir -p "$persistance_d"
   # chmod o+rwx "$persistance_d"
   egrep docker-compose .gitignore >/dev/null || echo 'docker-compose.yml' >> .gitignore
@@ -17,8 +18,8 @@ main() {
     rm docker-compose.yml.bak
   fi ;
   if ! egrep 'USERMAP_UID' docker-compose.yml >/dev/null ; then
-    cat docker-compose.yml     | sed -E "s/^( *)environment: *\$/\\0\\n\\1- USERMAP_GID=$(id -g)/" > docker-compose.yml.bak
-    cat docker-compose.yml.bak | sed -E "s/^( *)environment: *\$/\\0\\n\\1- USERMAP_UID=$(id -u)/" > docker-compose.yml
+    cat docker-compose.yml     | $sed -E "s/^( *)environment: *\$/\\0\\n\\1- USERMAP_GID=$(id -g)/" > docker-compose.yml.bak
+    cat docker-compose.yml.bak | $sed -E "s/^( *)environment: *\$/\\0\\n\\1- USERMAP_UID=$(id -u)/" > docker-compose.yml
     rm docker-compose.yml.bak
   fi ;
   docker-compose up -d \
